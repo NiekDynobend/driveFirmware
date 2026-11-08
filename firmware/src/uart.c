@@ -58,3 +58,29 @@ size_t uart_read(uint8_t* buff, size_t max){
     }
     return result;
 }
+
+
+void uart_write(const uint8_t* data, size_t len)
+{
+    HAL_UART_Transmit(&huart1, (uint8_t*)data, (uint16_t)len, 10);  // 10 ms timeout
+}
+
+
+void HAL_UART_MspInit(UART_HandleTypeDef* huart)
+{
+    if(huart->Instance == USART1){
+        __HAL_RCC_USART1_CLK_ENABLE();
+        __HAL_RCC_GPIOA_CLK_ENABLE();
+
+        GPIO_InitTypeDef g = {0};
+        g.Pin   = GPIO_PIN_9;               // TX
+        g.Mode  = GPIO_MODE_AF_PP;
+        g.Speed = GPIO_SPEED_FREQ_HIGH;
+        HAL_GPIO_Init(GPIOA, &g);
+
+        g.Pin  = GPIO_PIN_10;               // RX
+        g.Mode = GPIO_MODE_INPUT;
+        g.Pull = GPIO_PULLUP;
+        HAL_GPIO_Init(GPIOA, &g);
+    }
+}

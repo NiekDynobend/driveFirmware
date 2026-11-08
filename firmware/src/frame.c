@@ -88,28 +88,33 @@ bool frameDecoderFeed(FrameDecoder* frame_decoder, uint8_t byte)
             frame_decoder->state = PARSER_LEN;
             frame_decoder->buffer[frame_decoder->buffer_idx] = byte;
             frame_decoder->buffer_idx++;
-
         break;
     
     case PARSER_LEN:
+            if(byte > 8){                       // impossible length -> start over
+                frame_decoder->state = PARSER_WAIT_SOF;
+                break;
+            }
             frame_decoder->state = PARSER_DATA;
             frame_decoder->buffer[frame_decoder->buffer_idx] = byte;
             frame_decoder->buffer_idx++;
+            
 
         break;
     
     case PARSER_DATA:
-
-            frame_decoder->state = PARSER_CRC;
             frame_decoder->buffer[frame_decoder->buffer_idx] = byte;
             frame_decoder->buffer_idx++;
+            if(frame_decoder->buffer_idx == 4 + 8){   // header (4) + 8 data bytes
+                frame_decoder->state = PARSER_CRC;
+            }
 
         break;
     
     case PARSER_CRC:
             frame_decoder->state = PARSER_WAIT_SOF;
             frame_decoder->buffer[frame_decoder->buffer_idx] = byte;
-            return true;
+            return byte == crc;
         break;
 
     default:

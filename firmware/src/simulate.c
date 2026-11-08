@@ -65,7 +65,7 @@ bool compare_original(uint8_t* data, uint8_t len)
 }
 
 
-int main(){
+int main_sim(){
     uint8_t data_test[8];
     data_test[0] = 10;
     data_test[1] = 18;

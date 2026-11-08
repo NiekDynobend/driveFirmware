@@ -1,17 +1,13 @@
 #include <stdint.h>
+#include <stdint.h>
+#include <stddef.h>    
 
 #ifndef UART_H
 #define UART_H
 
 
-
-
-void uart_init();
-
-void uart_write();
-
-
-// Checks if bytes came in on rx and returns how many, 0 means nothing arrived
-size_t uart_read(uint8_t* , size_t);
+void uart_init(void);
+void uart_write(const uint8_t* data, size_t len);
+size_t uart_read(uint8_t* buff, size_t max);   // returns number of bytes read, 0 = nothing
 
 #endif

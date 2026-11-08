@@ -1,38 +1,26 @@
 #include "board.h"
 #include "frame.h"
-
+#include "uart.h"
+#include "commands.h"
 
 int main(void)
 {
-    // Define frame decoder
-    FrameDecoder frame_decoder;
-    CanFrame can_frame;
-    uint8_t received_byte;
-    bool decode_result = false;
-    init_frame_decoder(&frame_decoder);
-    // init board
-    board_init();
+    FrameDecoder decoder;
+    CanFrame rx;
+    uint8_t byte;
 
-    // timer
-    uint32_t last = 0;
-    const uint32_t update_time = 500;
+    board_init();
+    uart_init();                      // was missing: USART1 is never set up
+    init_frame_decoder(&decoder);
+
     while(1)
     {
-        uint32_t now = board_millis();
-        if(now-last>update_time){
-            board_toggle_led();
-            last = now;
+        if(uart_read(&byte, 1)){                           // only when a byte arrived
+            if(frameDecoderFeed(&decoder, byte) &&
+               decodeFrame(decoder.buffer, &rx)){          // only when a full frame is in
+                board_toggle_led();
+                handle_command(&rx);                       // once per frame
+            }
         }
-
-        if(frameDecoderFeed(&frame_decoder, received_byte)){
-            decode_result = decodeFrame(&frame_decoder.buffer, &can_frame);
-        }
-        if(decode_result){
-            printf("Message succesfully received and decoded.");
-            decode_result = false;
-        }
-
-        
-
     }
 }
