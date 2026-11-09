@@ -16,7 +16,6 @@ void handle_command(const CanFrame* rx)
     switch(rx->id){
     case MSG_PING:
         pong(rx->data[0]);
-        board_toggle_led();
         break;
     case MSG_COMMAND:
         // ...
